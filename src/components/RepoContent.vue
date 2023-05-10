@@ -1,6 +1,6 @@
 <script lang="ts">
 import { SmileOutlined, DownOutlined } from '@ant-design/icons-vue'
-import { defineComponent, watch } from 'vue'
+import { defineComponent } from 'vue'
 import { useStore } from '@/store.js'
 import service from '@/utils'
 import router from '@/router'
@@ -12,14 +12,9 @@ const columns = [
     slots: { title: 'customTitle', customRender: 'name' }
   },
   {
-    title: 'Action',
-    key: 'action',
-    slots: { customRender: 'action' }
-  },
-  {
-    title: 'Uniuqe Name',
-    dataIndex: 'unique_name',
-    key: 'uniqueName'
+    title: 'Type',
+    dataIndex: 'type',
+    key: 'type'
   }
 ]
 
@@ -29,17 +24,22 @@ export default defineComponent({
     return {
       columns,
       data: data,
-      isLoading: true
+      isLoading: true,
+      repoUuid: this.$route.params.path,
+      path: this.$route.params.filePath,
     }
   },
   methods: {
-    getRepos() {
+    getRepoContent() {
+      let repoUuid = this.repoUuid
+      let filePath = this.path
+      console.log(repoUuid, filePath)
       const store = useStore()
       let self = this
-      console.log('sss', store.token)
+      // console.log('sss', store.token)
       service({
         method: 'get',
-        url: '/repo/',
+        url: `/repo/${repoUuid}/tree`,
         headers: {
           Authorization: `Bearer ${store.token}`
         }
@@ -55,18 +55,23 @@ export default defineComponent({
           // console.log(error)
         })
     },
-    click_repo(uniqueName: string) {
-      console.log('click_repo', uniqueName)
-      router.push({ name: 'repoContent', params: { path: uniqueName } })
+    click(path: string, fileType: string) {
+      console.log('click', this.repoUuid, path, fileType)
+      if (fileType == 'file') {
+        console.log('click', this.repoUuid, path, fileType)
+        router.push({ name: 'repoFileMeta', params: { path: this.repoUuid, filePath: path } })
+      } else if (fileType == 'dir') {
+        // router.push({ name: 'repoTree', params: { path: this.repoUuid, filePath: path } })
+      }
     }
   },
   mounted() {
-    this.getRepos()
+    this.getRepoContent()
     console.log('mounted', this.isLoading)
   },
   components: {
-    SmileOutlined,
-    DownOutlined
+    SmileOutlined, // <a-icon type="smile" />
+    DownOutlined // <a-icon type="down" />
   }
 })
 </script>
@@ -75,35 +80,12 @@ export default defineComponent({
   <div v-if="!isLoading">
     <a-table :columns="columns" :data-source="data" rowKey="id">
       <template #name="{ record }">
-        <a @click="click_repo(record.unique_name)">{{ record.name }}</a>
+        <a @click="click(record.path, record.type)">{{ record.name }}</a>
       </template>
       <template #customTitle>
         <span>
           <smile-outlined />
           Name
-        </span>
-      </template>
-      <!-- <template #tags="{ text: tags }">
-      <span>
-        <a-tag
-          v-for="tag in tags"
-          :key="tag"
-          :color="tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'"
-        >
-          {{ tag.toUpperCase() }}
-        </a-tag>
-      </span>
-    </template> -->
-      <template #action="{ record }">
-        <span>
-          <a>onwer: {{ record.name }}</a>
-          <a-divider type="vertical" />
-          <a>Delete</a>
-          <a-divider type="vertical" />
-          <a class="ant-dropdown-link">
-            More actions
-            <down-outlined />
-          </a>
         </span>
       </template>
     </a-table>

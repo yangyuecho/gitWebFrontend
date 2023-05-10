@@ -10,6 +10,21 @@ const router = createRouter({
       component: () => import('@/views/RepoListView.vue')
     },
     {
+      path: '/:path',
+      name: 'repoContent',
+      component: () => import('@/views/RepoContentView.vue')
+    },
+    {
+      path: '/:path/tree/:filePath',
+      name: 'repoTree',
+      component: () => import('@/views/RepoContentView.vue')
+    },
+    {
+      path: '/:path/deferred-metadata/:filePath',
+      name: 'repoFileMeta',
+      component: () => import('@/views/FileContentView.vue')
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/UserView.vue')
