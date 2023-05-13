@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useStore } from '@/store.js'
-import service from '@/utils'
+import {service, getToken} from '@/utils'
 
 export default defineComponent({
   data() {
@@ -14,13 +14,15 @@ export default defineComponent({
   methods: {
     getFileContent() {
       let repoUuid = this.repoUuid
-      const store = useStore()
+      // const store = useStore()
+      const token = getToken()
+      console.log('sss', token)
       let self = this
       service({
         method: 'get',
         url: `/repo/${repoUuid}/deferred-metadata/?branch=main&path=${this.filePath}`,
         headers: {
-          Authorization: `Bearer ${store.token}`
+          Authorization: `Bearer ${token}`
         }
       })
         .then(function (response) {

@@ -2,7 +2,7 @@
 import { SmileOutlined, DownOutlined } from '@ant-design/icons-vue'
 import { defineComponent } from 'vue'
 import { useStore } from '@/store.js'
-import service from '@/utils'
+import {service, getToken} from '@/utils'
 import router from '@/router'
 
 const columns = [
@@ -34,14 +34,15 @@ export default defineComponent({
       let repoUuid = this.repoUuid
       let filePath = this.path
       console.log(repoUuid, filePath)
-      const store = useStore()
+      // const store = useStore()
       let self = this
       // console.log('sss', store.token)
+      const token = getToken()
       service({
         method: 'get',
         url: `/repo/${repoUuid}/tree`,
         headers: {
-          Authorization: `Bearer ${store.token}`
+          Authorization: `Bearer ${token}`
         }
       })
         .then(function (response) {

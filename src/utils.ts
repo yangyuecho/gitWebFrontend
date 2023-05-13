@@ -1,6 +1,14 @@
 import axios from 'axios'
 import router from '@/router'
 
+function setToken(token: string) {
+    localStorage.setItem('token', token)
+}
+
+function getToken() {
+    return localStorage.getItem('token')
+}
+
 const service = axios.create({
   baseURL: '/api',
   timeout: 300000
@@ -34,4 +42,11 @@ service.interceptors.response.use(
   }
 )
 
-export default service
+// export default service
+
+export { 
+    setToken, 
+    getToken,
+    service,
+}
+
