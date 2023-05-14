@@ -13,6 +13,16 @@ const columns = [
     slots: { title: 'customTitle', customRender: 'name' }
   },
   {
+    title: '',
+    dataIndex: 'commit_message',
+    key: 'commit_message'
+  },
+  {
+    title: '提交时间',
+    dataIndex: 'commit_time',
+    key: 'commit_time'
+  },
+  {
     title: 'Type',
     dataIndex: 'type',
     key: 'type'
@@ -28,13 +38,6 @@ export default defineComponent({
       isLoading: true,
       repoUuid: this.$route.params.path,
       path: this.$route.params.filePath,
-    }
-  },
-  watch: {
-    '$route' (to, from) {
-      console.log('watch', to, from)
-      // 对路由变化作出响应...
-      // this.getRepoContent()
     }
   },
   methods: {
@@ -72,10 +75,10 @@ export default defineComponent({
     click(path: string, fileType: string) {
       // console.log('click', this.repoUuid, path, fileType)
       if (fileType == 'file') {
-        console.log('click', this.repoUuid, path, fileType)
+        // console.log('click', this.repoUuid, path, fileType)
         router.push({ name: 'repoFileMeta', params: { path: this.repoUuid, filePath: path } })
       } else if (fileType == 'dir') {
-        console.log('click', this.repoUuid, path, fileType)
+        // console.log('click', this.repoUuid, path, fileType)
         router.push({ name: 'repoTree', params: { path: this.repoUuid, filePath: path } })
       }
     },
