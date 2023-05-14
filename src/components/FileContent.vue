@@ -20,7 +20,7 @@ export default defineComponent({
       let self = this
       service({
         method: 'get',
-        url: `/repo/${repoUuid}/deferred-metadata/?branch=main&path=${this.filePath}`,
+        url: `/repo/${repoUuid}/deferred-metadata/?branch=&path=${this.filePath}`,
         headers: {
           Authorization: `Bearer ${token}`
         }

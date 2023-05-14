@@ -18,7 +18,7 @@ import { RouterLink, RouterView } from 'vue-router'
     </header>
   </div>
   <!-- 路由匹配到的组件将渲染在这里 -->
-  <router-view></router-view>
+  <router-view class="mk_nav_content" :key="$route.fullPath"></router-view>
 </template>
 
 <style scoped>

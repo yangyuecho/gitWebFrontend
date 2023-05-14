@@ -1,9 +1,10 @@
 <script lang="ts">
 import { SmileOutlined, DownOutlined } from '@ant-design/icons-vue'
-import { defineComponent } from 'vue'
+import { defineComponent, reactive } from 'vue'
 import { useStore } from '@/store.js'
-import {service, getToken} from '@/utils'
+import {service, getToken, addQuery} from '@/utils'
 import router from '@/router'
+import { useRoute } from 'vue-router'
 
 const columns = [
   {
@@ -29,18 +30,29 @@ export default defineComponent({
       path: this.$route.params.filePath,
     }
   },
+  watch: {
+    '$route' (to, from) {
+      console.log('watch', to, from)
+      // 对路由变化作出响应...
+      // this.getRepoContent()
+    }
+  },
   methods: {
     getRepoContent() {
       let repoUuid = this.repoUuid
-      let filePath = this.path
+      let filePath = this.path ? this.path : ''
       console.log(repoUuid, filePath)
-      // const store = useStore()
       let self = this
-      // console.log('sss', store.token)
       const token = getToken()
+      let queryDict = {
+        branch: '',
+        path: filePath
+      }
+      let url = `/repo/${repoUuid}/tree/`
+      url = addQuery(url, queryDict)
       service({
         method: 'get',
-        url: `/repo/${repoUuid}/tree`,
+        url: url,
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -50,6 +62,7 @@ export default defineComponent({
           for (let i = 0; i < response.data.length; i++) {
             self.data.push(response.data[i])
           }
+          // console.log(self.data)
           self.isLoading = false
         })
         .catch(function (error) {
@@ -57,17 +70,45 @@ export default defineComponent({
         })
     },
     click(path: string, fileType: string) {
-      console.log('click', this.repoUuid, path, fileType)
+      // console.log('click', this.repoUuid, path, fileType)
       if (fileType == 'file') {
         console.log('click', this.repoUuid, path, fileType)
         router.push({ name: 'repoFileMeta', params: { path: this.repoUuid, filePath: path } })
       } else if (fileType == 'dir') {
-        // router.push({ name: 'repoTree', params: { path: this.repoUuid, filePath: path } })
+        console.log('click', this.repoUuid, path, fileType)
+        router.push({ name: 'repoTree', params: { path: this.repoUuid, filePath: path } })
       }
-    }
+    },
+    getCommits() {
+      let repoUuid = this.repoUuid
+      let filePath = this.path
+      console.log(repoUuid, filePath)
+      // const store = useStore()
+      let self = this
+      // console.log('sss', store.token)
+      const token = getToken()
+      service({
+        method: 'get',
+        url: `/repo/${repoUuid}/commits`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+        .then(function (response) {
+          console.log(response)
+          // for (let i = 0; i < response.data.length; i++) {
+          //   self.data.push(response.data[i])
+          // }
+          // self.isLoading = false
+        })
+        .catch(function (error) {
+          // console.log(error)
+        })
+    },
   },
   mounted() {
     this.getRepoContent()
+    // this.getCommits()
     console.log('mounted', this.isLoading)
   },
   components: {

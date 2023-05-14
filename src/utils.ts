@@ -42,11 +42,26 @@ service.interceptors.response.use(
   }
 )
 
+const addQuery = (url: string, query: any ) => {
+    // console.log(`adding ${url} query: `, query)
+    let queryStr = ''
+    for (let key in query) {
+        let value = query[key]
+        if (value !== "" && value != null) {
+            queryStr += `${key}=${value}&`
+        }
+    }
+    queryStr = queryStr.slice(0, queryStr.length - 1)
+    // console.log(`adding ${url} query: `, queryStr)
+    return `${url}?${queryStr}`
+}
+
 // export default service
 
 export { 
     setToken, 
     getToken,
     service,
+    addQuery,
 }
 
