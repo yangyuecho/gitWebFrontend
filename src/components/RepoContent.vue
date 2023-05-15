@@ -108,10 +108,37 @@ export default defineComponent({
           // console.log(error)
         })
     },
+    getBranches () {
+      let repoUuid = this.repoUuid
+      let filePath = this.path
+      console.log(repoUuid, filePath)
+      // const store = useStore()
+      let self = this
+      // console.log('sss', store.token)
+      const token = getToken()
+      service({
+        method: 'get',
+        url: `/repo/${repoUuid}/branches`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+        .then(function (response) {
+          console.log(response)
+          // for (let i = 0; i < response.data.length; i++) {
+          //   self.data.push(response.data[i])
+          // }
+          // self.isLoading = false
+        })
+        .catch(function (error) {
+          // console.log(error)
+        })
+    },
   },
   mounted() {
     this.getRepoContent()
-    // this.getCommits()
+    this.getCommits()
+    this.getBranches()
     console.log('mounted', this.isLoading)
   },
   components: {
