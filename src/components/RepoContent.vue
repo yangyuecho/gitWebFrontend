@@ -34,6 +34,9 @@ export default defineComponent({
     let data: any = []
     let branches: any = []
     let commits: any = []
+    let currCommitObj: any = {}
+    let currCommit = this.$route.query?.commit
+    // console.log(currCommitObj, commits.length)
     return {
       columns,
       data: data,
@@ -41,9 +44,11 @@ export default defineComponent({
       repoUuid: this.$route.params.path,
       path: this.$route.params.filePath,
       currBranch: this.$route.query?.branch,
-      currCommit: this.$route.query?.commit,
+      currCommit: currCommit,
       branches,
-      commits
+      commits,
+      currCommitObj,
+      commitCount: 0,
     }
   },
   methods: {
@@ -73,8 +78,9 @@ export default defineComponent({
           res.push(response.data[i])
         }
         self.data = res
-        // console.log(self.data)
+        
         self.isLoading = false
+        console.log(self.currCommitObj, self.commits.length)
       })
     },
     click(path: string, fileType: string) {
@@ -86,6 +92,12 @@ export default defineComponent({
         // console.log('click', this.repoUuid, path, fileType)
         router.push({ name: 'repoTree', params: { path: this.repoUuid, filePath: path } })
       }
+    },
+    goToCommitList() {
+      router.push({ name: 'CommitList', 
+        params: { path: this.repoUuid},
+        query: { branch: this.$route.query.branch}
+      })
     },
     getCommits() {
       let repoUuid = this.repoUuid
@@ -111,11 +123,16 @@ export default defineComponent({
         let res = []
         for (let i = 0; i < response.data.commits.length; i++) {
           let e = response.data.commits[i]
-          if (i == 0 && !self.currCommit) {
+          if (!self.currCommit && i == 0) {
             self.currCommit = e.hash
+            self.currCommitObj = e
+          } else if (self.currCommit == e.hash) {
+            self.currCommitObj = e
           }
           res.push(e)
+          self.commitCount = i + 1
         }
+        console.log('commits', self.commitCount)
         self.commits = res
         self.getRepoContent()
         // 获取数据
@@ -179,7 +196,7 @@ export default defineComponent({
         router.push({
           name: 'repoContent',
           params: { path: this.$route.params.path },
-          query: { branch: this.currBranch, commit: this.currCommit }
+          query: { branch: this.$route.query.branch, commit: this.currCommit}
         })
       }
     }
@@ -206,6 +223,17 @@ export default defineComponent({
       { return ({ value: ele.hash })})"
     ></a-select>
   </a-space>
+  
+  <a-descriptions title="">
+    <a-descriptions-item label="CommitMessage"> {{ currCommitObj.message }}</a-descriptions-item>
+    <a-descriptions-item label="CommitTime">{{ currCommitObj.commit_time }}</a-descriptions-item>
+    <!-- <a-descriptions-item label="commitHash"> {{ currCommitObj.hash }}</a-descriptions-item> -->
+    <a-descriptions-item>
+      <a-badge status="processing"/> 
+      <div @click="goToCommitList()">{{ commitCount }}</div>
+    </a-descriptions-item>
+  </a-descriptions>
+
   <div v-if="!isLoading">
     <a-table :columns="columns" :data-source="data" rowKey="id">
       <template #name="{ record }">

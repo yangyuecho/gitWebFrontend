@@ -16,7 +16,7 @@ const service = axios.create({
 
 service.interceptors.response.use(
   (response) => {
-    console.log('response', response)
+    // console.log('response', response)
     return response
   },
   (error) => {
