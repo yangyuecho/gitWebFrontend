@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useStore } from '@/store.js'
-import {service, getToken} from '@/utils'
+import { service, getToken } from '@/utils'
 
 export default defineComponent({
   data() {
@@ -37,10 +37,10 @@ export default defineComponent({
   mounted() {
     this.getFileContent()
     console.log('mounted')
-  },
+  }
 })
 </script>
 
 <template>
-  <div>{{content}}</div>
+  <div>{{ content }}</div>
 </template>

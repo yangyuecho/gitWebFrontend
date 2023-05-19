@@ -2,11 +2,11 @@ import axios from 'axios'
 import router from '@/router'
 
 function setToken(token: string) {
-    localStorage.setItem('token', token)
+  localStorage.setItem('token', token)
 }
 
 function getToken() {
-    return localStorage.getItem('token')
+  return localStorage.getItem('token')
 }
 
 const service = axios.create({
@@ -42,26 +42,20 @@ service.interceptors.response.use(
   }
 )
 
-const addQuery = (url: string, query: any ) => {
-    // console.log(`adding ${url} query: `, query)
-    let queryStr = ''
-    for (let key in query) {
-        let value = query[key]
-        if (value !== "" && value != null) {
-            queryStr += `${key}=${value}&`
-        }
+const addQuery = (url: string, query: any) => {
+  // console.log(`adding ${url} query: `, query)
+  let queryStr = ''
+  for (let key in query) {
+    let value = query[key]
+    if (value !== '' && value != null) {
+      queryStr += `${key}=${value}&`
     }
-    queryStr = queryStr.slice(0, queryStr.length - 1)
-    // console.log(`adding ${url} query: `, queryStr)
-    return `${url}?${queryStr}`
+  }
+  queryStr = queryStr.slice(0, queryStr.length - 1)
+  // console.log(`adding ${url} query: `, queryStr)
+  return `${url}?${queryStr}`
 }
 
 // export default service
 
-export { 
-    setToken, 
-    getToken,
-    service,
-    addQuery,
-}
-
+export { setToken, getToken, service, addQuery }
