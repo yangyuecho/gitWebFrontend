@@ -30,6 +30,11 @@ const router = createRouter({
       component: () => import('@/views/FileContentView.vue')
     },
     {
+      path: '/:path/diff',
+      name: 'commitDiff',
+      component: () => import('@/views/DiffContentView.vue')
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/UserView.vue')

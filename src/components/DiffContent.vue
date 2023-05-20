@@ -4,57 +4,72 @@ import { defineComponent, reactive } from 'vue'
 import { useStore } from '@/store.js'
 import { service, getToken, addQuery } from '@/utils'
 import router from '@/router'
-import { useRoute } from 'vue-router'
+import * as Diff2Html from 'diff2html';
 
-const columns = [
- {
-    title: 'message',
-    dataIndex: 'message',
-    key: 'message'
-  },
-  {
-    title: 'author_name',
-    dataIndex: 'author_name',
-    key: 'author_name'
-  },
-  {
-    title: 'commit_time',
-    dataIndex: 'commit_time',
-    key: 'commit_time'
-  },
-  // {
-  //   dataIndex: 'name',
-  //   key: 'name',
-  //   slots: { title: 'customTitle', customRender: 'name' }
-  // },
-  {
-    dataIndex: 'hash',
-    key: 'hash',
-    title: 'hash',
-  }
-]
 
 export default defineComponent({
   data() {
-    let data: any = []
     let branches: any = []
     let commits: any = []
+    let currCommitObj: any = {}
+    let currCommit = this.$route.query?.commit
+    // console.log(currCommitObj, commits.length)
     return {
-      columns,
-      data: data,
-      isLoading: true,
       repoUuid: this.$route.params.path,
+    //   path: this.$route.params?.filePath,
       currBranch: this.$route.query?.branch,
+      currCommit: currCommit,
       branches,
       commits,
+      currCommitObj,
+      diffs: ""
+    }
+  },
+  computed: {
+    prettyHtml: function() {
+      return Diff2Html.html(this.diffs, {
+        drawFileList: true,
+        matching: 'lines',
+        outputFormat: 'side-by-side',
+    });
     }
   },
   methods: {
+    getDiff() {
+      let repoUuid = this.repoUuid
+    //   let filePath = this.path ? this.path : ''
+      let self = this
+      const token = getToken()
+      let queryDict = {
+        // branch: this.currBranch,
+        commit: this.currCommit,
+      }
+      let url = `/repo/${repoUuid}/diff/`
+      url = addQuery(url, queryDict)
+      service({
+        method: 'get',
+        url: url,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(function (response) {   
+        self.diffs = response.data
+      })
+    },
+    goToCommitList() {
+      router.push({ name: 'CommitList', 
+        params: { path: this.repoUuid},
+        query: { branch: this.$route.query.branch}
+      })
+    },
     getCommits() {
       let repoUuid = this.repoUuid
+    //   let filePath = this.path
+    //   console.log(repoUuid, filePath)
       const token = getToken()
       let queryDict = {
         branch: this.currBranch,
+        // path: filePath
       }
       let url = `/repo/${repoUuid}/commits`
       url = addQuery(url, queryDict)
@@ -71,15 +86,23 @@ export default defineComponent({
         let res = []
         for (let i = 0; i < response.data.commits.length; i++) {
           let e = response.data.commits[i]
+          if (!self.currCommit && i == 0) {
+            self.currCommit = e.hash
+            self.currCommitObj = e
+          } else if (self.currCommit == e.hash) {
+            self.currCommitObj = e
+          }
           res.push(e)
         }
-        self.data = res
-        self.isLoading = false
+        self.commits = res
+        self.getDiff()
         // 获取数据
       })
     },
     getBranches() {
       let repoUuid = this.repoUuid
+    //   let filePath = this.path
+    //   console.log(repoUuid, filePath)
       // const store = useStore()
       let self = this
       // console.log('sss', store.token)
@@ -111,31 +134,32 @@ export default defineComponent({
         // 获取数据
         self.getCommits()
       })
-    },
-    goToDiff(commit: string) {
-      // console.log('goToDiff', commit)
-      router.push({
-        name: 'commitDiff',
-        params: { path: this.$route.params.path },
-        query: { branch: this.$route.query.branch, commit: commit }
-      })
     }
   },
   mounted() {
     this.getBranches()
-    console.log('mounted', this.isLoading)
   },
   watch: {
     currBranch: {
       handler() {
         console.log('branches changed', this.currBranch)
         router.push({
-          name: 'CommitList',
+          name: 'commitDiff',
           params: { path: this.$route.params.path },
           query: { branch: this.currBranch }
         })
       }
     },
+    currCommit: {
+      handler() {
+        console.log('commit changed', this.currCommit)
+        router.push({
+          name: 'commitDiff',
+          params: { path: this.$route.params.path },
+          query: { branch: this.$route.query.branch, commit: this.currCommit}
+        })
+      }
+    }
   },
   components: {
     SmileOutlined, // <a-icon type="smile" />
@@ -143,6 +167,10 @@ export default defineComponent({
   }
 })
 </script>
+
+<style>
+@import "~/diff2html/bundles/css/diff2html.min.css";
+</style>
 
 <template>
   <a-space>
@@ -152,17 +180,21 @@ export default defineComponent({
       :options="branches.map((ele: any) => 
       { return ({ value: ele.name })})"
     ></a-select>
+    <a-select
+      v-model:value="currCommit"
+      style="width: 120px"
+      :options="commits.map((ele: any) => 
+      { return ({ value: ele.hash })})"
+    ></a-select>
   </a-space>
+  
+  <a-descriptions title="">
+    <a-descriptions-item label="CommitMessage"> {{ currCommitObj.message }}</a-descriptions-item>
+    <a-descriptions-item label="CommitTime">{{ currCommitObj.commit_time }}</a-descriptions-item>
+    <!-- <a-descriptions-item label="commitHash"> {{ currCommitObj.hash }}</a-descriptions-item> -->
+  </a-descriptions>
 
-  <div v-if="!isLoading">
-    <a-table :columns="columns" :data-source="data" rowKey="hash">
-      <template #bodyCell="{ column, record }">
-        <template v-if="column.key === 'hash'">
-          <a @click="goToDiff(record.hash)">
-            {{ record.hash }}
-          </a>
-        </template>
-      </template>
-    </a-table>
-  </div>
+  <div v-html="prettyHtml"></div>
 </template>
+
+
