@@ -34,6 +34,7 @@ export default defineComponent({
     let data: any = []
     let branches: any = []
     let commits: any = []
+    let tags: any = []
     let currCommitObj: any = {}
     let currCommit = this.$route.query?.commit
     // console.log(currCommitObj, commits.length)
@@ -44,9 +45,11 @@ export default defineComponent({
       repoUuid: this.$route.params.path,
       path: this.$route.params.filePath,
       currBranch: this.$route.query?.branch,
+      currTag: this.$route.query?.tag,
       currCommit: currCommit,
       branches,
       commits,
+      tags,
       currCommitObj,
       commitCount: 0,
     }
@@ -61,6 +64,7 @@ export default defineComponent({
       let queryDict = {
         branch: this.currBranch,
         commit: this.currCommit,
+        tag: this.currTag,
         path: filePath
       }
       let url = `/repo/${repoUuid}/tree/`
@@ -80,7 +84,7 @@ export default defineComponent({
         self.data = res
         
         self.isLoading = false
-        console.log(self.currCommitObj, self.commits.length)
+        // console.log(self.currCommitObj, self.commits.length)
       })
     },
     click(path: string, fileType: string) {
@@ -154,15 +158,18 @@ export default defineComponent({
         }
       }).then(function (response) {
         console.log('branch', response)
-        // 在列表中显示分支, 默认是 is_head 为 true 的分支, 如果没有选择分支的话, 需要修改默认值
+        let res = []
         for (let i = 0; i < response.data.length; i++) {
           let e = response.data[i]
-          if (e.is_head && !self.currBranch) {
+          // 当没有选择分支和标签时, 选择 is_head 为 true 的分支
+          if (e.is_head && !self.currBranch && !self.currTag) {
             self.currBranch = e.name
           }
-          self.branches.push(e)
+          res.push(e)
         }
-        if (self.$route.query?.branch != self.currBranch) {
+        self.branches = res
+        console.log('tag', self.$route.query?.tag)
+        if (!(self.$route.query?.tag) && (self.$route.query?.branch != self.currBranch)) {
           // 修改路由
           router.push({
             name: 'repoContent',
@@ -173,16 +180,35 @@ export default defineComponent({
         // 获取数据
         self.getCommits()
       })
+    },
+    getTags() {
+      let repoUuid = this.repoUuid
+      let self = this
+      const token = getToken()
+      service({
+        method: 'get',
+        url: `/repo/${repoUuid}/tags`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(function (response) {
+        self.tags = response.data
+      })
     }
   },
   mounted() {
     this.getBranches()
+    this.getTags()
     console.log('mounted', this.isLoading)
   },
   watch: {
     currBranch: {
-      handler() {
-        console.log('branches changed', this.currBranch)
+      handler(newVal, oldVal) {
+        console.log('branches changed', newVal, oldVal)
+        if ((!oldVal && !this.currTag) || (this.currTag && !newVal)) {
+          console.log('branches changed', '不触发')
+          return
+        }
         router.push({
           name: 'repoContent',
           params: { path: this.$route.params.path },
@@ -191,12 +217,36 @@ export default defineComponent({
       }
     },
     currCommit: {
-      handler() {
-        console.log('commit changed', this.currCommit)
+      handler(newVal, oldVal) {
+        console.log('commit changed', this.currCommit, oldVal)
+        // 默认是第一个 commit, 第一次切换 commit 时, 不触发
+        if (!oldVal || this.currTag) {
+          console.log('commit changed', '不触发')
+          return
+        }
         router.push({
           name: 'repoContent',
           params: { path: this.$route.params.path },
           query: { branch: this.$route.query.branch, commit: this.currCommit}
+        })
+      }
+    },
+    currTag: {
+      handler(newVal, oldVal) {
+        console.log('tag changed', this.currTag)
+        this.currCommit = ""
+        for (let i = 0; i < this.tags.length; i++) {
+          let e = this.tags[i]
+          if (e.tag == this.currTag) {
+            this.currCommit = e.hash
+            this.currCommitObj = e
+            break
+          }
+        }
+        router.push({
+          name: 'repoContent',
+          params: { path: this.$route.params.path },
+          query: { tag: this.currTag, commit: this.currCommit}
         })
       }
     }
@@ -215,6 +265,12 @@ export default defineComponent({
       style="width: 120px"
       :options="branches.map((ele: any) => 
       { return ({ value: ele.name })})"
+    ></a-select>
+    <a-select
+      v-model:value="currTag"
+      style="width: 120px"
+      :options="tags.map((ele: any) => 
+      { return ({ value: ele.tag })})"
     ></a-select>
     <a-select
       v-model:value="currCommit"
