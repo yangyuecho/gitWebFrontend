@@ -4,8 +4,7 @@ import { defineComponent, reactive } from 'vue'
 import { useStore } from '@/store.js'
 import { service, getToken, addQuery } from '@/utils'
 import router from '@/router'
-import * as Diff2Html from 'diff2html';
-
+import * as Diff2Html from 'diff2html'
 
 export default defineComponent({
   data() {
@@ -16,33 +15,33 @@ export default defineComponent({
     // console.log(currCommitObj, commits.length)
     return {
       repoUuid: this.$route.params.path,
-    //   path: this.$route.params?.filePath,
+      //   path: this.$route.params?.filePath,
       currBranch: this.$route.query?.branch,
       currCommit: currCommit,
       branches,
       commits,
       currCommitObj,
-      diffs: ""
+      diffs: ''
     }
   },
   computed: {
-    prettyHtml: function() {
+    prettyHtml: function () {
       return Diff2Html.html(this.diffs, {
         drawFileList: true,
         matching: 'lines',
-        outputFormat: 'side-by-side',
-    });
+        outputFormat: 'side-by-side'
+      })
     }
   },
   methods: {
     getDiff() {
       let repoUuid = this.repoUuid
-    //   let filePath = this.path ? this.path : ''
+      //   let filePath = this.path ? this.path : ''
       let self = this
       const token = getToken()
       let queryDict = {
         // branch: this.currBranch,
-        commit: this.currCommit,
+        commit: this.currCommit
       }
       let url = `/repo/${repoUuid}/diff/`
       url = addQuery(url, queryDict)
@@ -52,23 +51,24 @@ export default defineComponent({
         headers: {
           Authorization: `Bearer ${token}`
         }
-      }).then(function (response) {   
+      }).then(function (response) {
         self.diffs = response.data
       })
     },
     goToCommitList() {
-      router.push({ name: 'CommitList', 
-        params: { path: this.repoUuid},
-        query: { branch: this.$route.query.branch}
+      router.push({
+        name: 'CommitList',
+        params: { path: this.repoUuid },
+        query: { branch: this.$route.query.branch }
       })
     },
     getCommits() {
       let repoUuid = this.repoUuid
-    //   let filePath = this.path
-    //   console.log(repoUuid, filePath)
+      //   let filePath = this.path
+      //   console.log(repoUuid, filePath)
       const token = getToken()
       let queryDict = {
-        branch: this.currBranch,
+        branch: this.currBranch
         // path: filePath
       }
       let url = `/repo/${repoUuid}/commits`
@@ -101,8 +101,8 @@ export default defineComponent({
     },
     getBranches() {
       let repoUuid = this.repoUuid
-    //   let filePath = this.path
-    //   console.log(repoUuid, filePath)
+      //   let filePath = this.path
+      //   console.log(repoUuid, filePath)
       // const store = useStore()
       let self = this
       // console.log('sss', store.token)
@@ -156,7 +156,7 @@ export default defineComponent({
         router.push({
           name: 'commitDiff',
           params: { path: this.$route.params.path },
-          query: { branch: this.$route.query.branch, commit: this.currCommit}
+          query: { branch: this.$route.query.branch, commit: this.currCommit }
         })
       }
     }
@@ -169,7 +169,7 @@ export default defineComponent({
 </script>
 
 <style>
-@import "~/diff2html/bundles/css/diff2html.min.css";
+@import '~/diff2html/bundles/css/diff2html.min.css';
 </style>
 
 <template>
@@ -187,7 +187,7 @@ export default defineComponent({
       { return ({ value: ele.hash })})"
     ></a-select>
   </a-space>
-  
+
   <a-descriptions title="">
     <a-descriptions-item label="CommitMessage"> {{ currCommitObj.message }}</a-descriptions-item>
     <a-descriptions-item label="CommitTime">{{ currCommitObj.commit_time }}</a-descriptions-item>
@@ -196,5 +196,3 @@ export default defineComponent({
 
   <div v-html="prettyHtml"></div>
 </template>
-
-

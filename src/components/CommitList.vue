@@ -7,7 +7,7 @@ import router from '@/router'
 import { useRoute } from 'vue-router'
 
 const columns = [
- {
+  {
     title: 'message',
     dataIndex: 'message',
     key: 'message'
@@ -30,7 +30,7 @@ const columns = [
   {
     dataIndex: 'hash',
     key: 'hash',
-    title: 'hash',
+    title: 'hash'
   }
 ]
 
@@ -46,7 +46,7 @@ export default defineComponent({
       repoUuid: this.$route.params.path,
       currBranch: this.$route.query?.branch,
       branches,
-      commits,
+      commits
     }
   },
   methods: {
@@ -54,7 +54,7 @@ export default defineComponent({
       let repoUuid = this.repoUuid
       const token = getToken()
       let queryDict = {
-        branch: this.currBranch,
+        branch: this.currBranch
       }
       let url = `/repo/${repoUuid}/commits`
       url = addQuery(url, queryDict)
@@ -135,7 +135,7 @@ export default defineComponent({
           query: { branch: this.currBranch }
         })
       }
-    },
+    }
   },
   components: {
     SmileOutlined, // <a-icon type="smile" />

@@ -35,6 +35,11 @@ const router = createRouter({
       component: () => import('@/views/DiffContentView.vue')
     },
     {
+      path: '/:path/compare',
+      name: 'compareDiff',
+      component: () => import('@/views/CompareView.vue')
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/UserView.vue')

@@ -51,7 +51,7 @@ export default defineComponent({
       commits,
       tags,
       currCommitObj,
-      commitCount: 0,
+      commitCount: 0
     }
   },
   methods: {
@@ -82,7 +82,7 @@ export default defineComponent({
           res.push(response.data[i])
         }
         self.data = res
-        
+
         self.isLoading = false
         // console.log(self.currCommitObj, self.commits.length)
       })
@@ -98,9 +98,10 @@ export default defineComponent({
       }
     },
     goToCommitList() {
-      router.push({ name: 'CommitList', 
-        params: { path: this.repoUuid},
-        query: { branch: this.$route.query.branch}
+      router.push({
+        name: 'CommitList',
+        params: { path: this.repoUuid },
+        query: { branch: this.$route.query.branch }
       })
     },
     getCommits() {
@@ -169,7 +170,7 @@ export default defineComponent({
         }
         self.branches = res
         console.log('tag', self.$route.query?.tag)
-        if (!(self.$route.query?.tag) && (self.$route.query?.branch != self.currBranch)) {
+        if (!self.$route.query?.tag && self.$route.query?.branch != self.currBranch) {
           // 修改路由
           router.push({
             name: 'repoContent',
@@ -193,6 +194,13 @@ export default defineComponent({
         }
       }).then(function (response) {
         self.tags = response.data
+      })
+    },
+    gotoCompare() {
+      router.push({
+        name: 'compareDiff',
+        params: { path: this.repoUuid }
+        // query: { branch: this.$route.query.branch }
       })
     }
   },
@@ -227,14 +235,14 @@ export default defineComponent({
         router.push({
           name: 'repoContent',
           params: { path: this.$route.params.path },
-          query: { branch: this.$route.query.branch, commit: this.currCommit}
+          query: { branch: this.$route.query.branch, commit: this.currCommit }
         })
       }
     },
     currTag: {
       handler(newVal, oldVal) {
         console.log('tag changed', this.currTag)
-        this.currCommit = ""
+        this.currCommit = ''
         for (let i = 0; i < this.tags.length; i++) {
           let e = this.tags[i]
           if (e.tag == this.currTag) {
@@ -246,7 +254,7 @@ export default defineComponent({
         router.push({
           name: 'repoContent',
           params: { path: this.$route.params.path },
-          query: { tag: this.currTag, commit: this.currCommit}
+          query: { tag: this.currTag, commit: this.currCommit }
         })
       }
     }
@@ -279,14 +287,19 @@ export default defineComponent({
       { return ({ value: ele.hash })})"
     ></a-select>
   </a-space>
-  
+
   <a-descriptions title="">
     <a-descriptions-item label="CommitMessage"> {{ currCommitObj.message }}</a-descriptions-item>
     <a-descriptions-item label="CommitTime">{{ currCommitObj.commit_time }}</a-descriptions-item>
     <!-- <a-descriptions-item label="commitHash"> {{ currCommitObj.hash }}</a-descriptions-item> -->
     <a-descriptions-item>
-      <a-badge status="processing"/> 
+      <a-badge status="processing" />
       <div @click="goToCommitList()">{{ commitCount }}</div>
+    </a-descriptions-item>
+    <a-descriptions-item>
+      <a-button type="primary" html-type="submit" @click="gotoCompare()"
+        >create pull request</a-button
+      >
     </a-descriptions-item>
   </a-descriptions>
 
