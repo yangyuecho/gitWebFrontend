@@ -110,8 +110,8 @@ export default defineComponent({
       console.log(repoUuid, filePath)
       const token = getToken()
       let queryDict = {
-        branch: this.currBranch,
-        path: filePath
+        branch: this.currBranch
+        // path: filePath
       }
       let url = `/repo/${repoUuid}/commits`
       url = addQuery(url, queryDict)
@@ -146,7 +146,7 @@ export default defineComponent({
     getBranches() {
       let repoUuid = this.repoUuid
       let filePath = this.path
-      console.log(repoUuid, filePath)
+      console.log('bbb', repoUuid, filePath)
       // const store = useStore()
       let self = this
       // console.log('sss', store.token)
@@ -170,14 +170,20 @@ export default defineComponent({
         }
         self.branches = res
         console.log('tag', self.$route.query?.tag)
-        if (!self.$route.query?.tag && self.$route.query?.branch != self.currBranch) {
+        if (
+          !self.$route.query?.tag &&
+          self.$route.query?.branch != self.currBranch &&
+          !self.$route.params.filePath
+        ) {
           // 修改路由
+          //
           router.push({
             name: 'repoContent',
             params: { path: self.$route.params.path },
             query: { branch: self.currBranch }
           })
         }
+
         // 获取数据
         self.getCommits()
       })
@@ -217,11 +223,19 @@ export default defineComponent({
           console.log('branches changed', '不触发')
           return
         }
-        router.push({
-          name: 'repoContent',
-          params: { path: this.$route.params.path },
-          query: { branch: this.currBranch }
-        })
+        if (this.$route.params?.filePath) {
+          router.push({
+            name: 'repoTree',
+            params: { path: this.repoUuid, filePath: this.$route.params?.filePath },
+            query: { branch: this.currBranch }
+          })
+        } else {
+          router.push({
+            name: 'repoContent',
+            params: { path: this.$route.params.path },
+            query: { branch: this.currBranch }
+          })
+        }
       }
     },
     currCommit: {
@@ -232,11 +246,19 @@ export default defineComponent({
           console.log('commit changed', '不触发')
           return
         }
-        router.push({
-          name: 'repoContent',
-          params: { path: this.$route.params.path },
-          query: { branch: this.$route.query.branch, commit: this.currCommit }
-        })
+        if (this.$route.params?.filePath) {
+          router.push({
+            name: 'repoTree',
+            params: { path: this.repoUuid, filePath: this.$route.params?.filePath },
+            query: { branch: this.$route.query.branch, commit: this.currCommit }
+          })
+        } else {
+          router.push({
+            name: 'repoContent',
+            params: { path: this.$route.params.path },
+            query: { branch: this.$route.query.branch, commit: this.currCommit }
+          })
+        }
       }
     },
     currTag: {
@@ -251,11 +273,19 @@ export default defineComponent({
             break
           }
         }
-        router.push({
-          name: 'repoContent',
-          params: { path: this.$route.params.path },
-          query: { tag: this.currTag, commit: this.currCommit }
-        })
+        if (this.$route.params?.filePath) {
+          router.push({
+            name: 'repoTree',
+            params: { path: this.repoUuid, filePath: this.$route.params?.filePath },
+            query: { tag: this.currTag, commit: this.currCommit }
+          })
+        } else {
+          router.push({
+            name: 'repoContent',
+            params: { path: this.$route.params.path },
+            query: { tag: this.currTag, commit: this.currCommit }
+          })
+        }
       }
     }
   },

@@ -137,10 +137,6 @@ export default defineComponent({
       }
     }
   },
-  components: {
-    SmileOutlined, // <a-icon type="smile" />
-    DownOutlined // <a-icon type="down" />
-  }
 })
 </script>
 

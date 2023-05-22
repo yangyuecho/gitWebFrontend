@@ -150,7 +150,12 @@ export default defineComponent({
     getCommits() {
       let repoUuid = this.repoUuid
       const token = getToken()
+      let queryDict = {
+        base: this.base,
+        compare: this.compare
+      }
       let url = `/repo/${repoUuid}/commits/compare/`
+      url = addQuery(url, queryDict)
       let self = this
       service({
         method: 'get',

@@ -25,6 +25,11 @@ const router = createRouter({
       component: () => import('@/views/CommitListView.vue')
     },
     {
+      path: '/:path/commit/:filePath',
+      name: 'FileCommitList',
+      component: () => import('@/views/CommitListView.vue')
+    },
+    {
       path: '/:path/deferred-metadata/:filePath',
       name: 'repoFileMeta',
       component: () => import('@/views/FileContentView.vue')

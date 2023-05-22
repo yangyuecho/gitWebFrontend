@@ -2,6 +2,7 @@
 import { defineComponent } from 'vue'
 import { useStore } from '@/store.js'
 import { service, getToken } from '@/utils'
+import router from '@/router'
 
 export default defineComponent({
   data() {
@@ -25,13 +26,16 @@ export default defineComponent({
           Authorization: `Bearer ${token}`
         }
       })
-        .then(function (response) {
-          self.content = response.data
-          console.log(response)
-        })
-        .catch(function (error) {
-          // console.log(error)
-        })
+      .then(function (response) {
+        self.content = response.data
+        console.log(response)
+      })
+    },
+    history() {
+      router.push({
+        name: 'FileCommitList',
+        params: { path: this.repoUuid, filePath: this.$route.params?.filePath },
+      })
     }
   },
   mounted() {
@@ -42,5 +46,8 @@ export default defineComponent({
 </script>
 
 <template>
+  <a-descriptions-item>
+    <a-button type="primary" html-type="submit" @click="history()">history</a-button>
+  </a-descriptions-item>
   <div>{{ content }}</div>
 </template>
