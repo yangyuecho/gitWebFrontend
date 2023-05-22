@@ -54,7 +54,8 @@ export default defineComponent({
       let repoUuid = this.repoUuid
       const token = getToken()
       let queryDict = {
-        branch: this.currBranch
+        branch: this.currBranch,
+        path: this.$route.params?.filePath,
       }
       let url = `/repo/${repoUuid}/commits`
       url = addQuery(url, queryDict)
@@ -100,7 +101,7 @@ export default defineComponent({
           }
           self.branches.push(e)
         }
-        if (self.$route.query?.branch != self.currBranch) {
+        if (self.$route.query?.branch != self.currBranch && !self.$route.params?.filePath) {
           // 修改路由
           router.push({
             name: 'repoContent',
@@ -129,11 +130,18 @@ export default defineComponent({
     currBranch: {
       handler() {
         console.log('branches changed', this.currBranch)
+        if (this.$route.params?.filePath) {
+          router.push({
+            name: 'FileCommitList',
+            params: { path: this.$route.params.path, filePath: this.$route.params?.filePath },
+            query: { branch: this.currBranch }
+          })
+        } else {
         router.push({
           name: 'CommitList',
           params: { path: this.$route.params.path },
           query: { branch: this.currBranch }
-        })
+        })}
       }
     }
   },
